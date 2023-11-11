@@ -56,7 +56,7 @@ def my_filtering_function(pair):
 
 # grades = {'John': 7.8, 'Mary': 9.0, 'Matt': 8.6, 'Michael': 9.5}
 
-@app.get('/dog')
+#@app.get('/dog')
 #def get_dogs(dk: string):
 #    # ваш код здесь
 #    dog_kind = dk
