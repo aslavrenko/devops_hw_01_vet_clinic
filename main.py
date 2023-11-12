@@ -1,6 +1,9 @@
 from enum import Enum
 from fastapi import FastAPI
 from pydantic import BaseModel
+import json
+import datetime as dt
+
 from fastapi.responses import JSONResponse
 
 app = FastAPI()
@@ -44,26 +47,31 @@ def root():
     # ваш код здесь
     return 'Добро пожаловать!'
 
-# ваш код здесь
-def my_filtering_function(pair):
-    wanted_key = dog_kind
-    key, value = pair
-    if value.kind == wanted_key:
-        return True  # filter pair out of the dictionary
-    else:
-        return False  # keep pair in the filtered dictionary
-
-
-# grades = {'John': 7.8, 'Mary': 9.0, 'Matt': 8.6, 'Michael': 9.5}
-
-#@app.get('/dog')
-#def get_dogs(dk: string):
-#    # ваш код здесь
-#    dog_kind = dk
-#    filtered_dog = dict(filter(my_filtering_function, dogs_db.items()))
-#    return JSONResponse(content=filtered_dog)
 
 @app.get('/dog/{pk}')
 def get_dog_by_id(pk: int):
     res = dogs_db.get(pk)
-    return res
+    return JSONResponse(res.__dict__)
+
+
+@app.post('/post')
+def post_timestamp():
+    new_timestamp = dt.datetime.now()
+    new_TS = Timestamp(id=post_db[-1].id + 1, timestamp = int(round(new_timestamp.timestamp())))
+    post_db.append(new_TS)
+    return JSONResponse(post_db[-1].__dict__)
+
+@app.get('/dog')
+def get_dog(dog_kind: DogType):
+  dogs_db_filtered =  {key: {"name": val.name, "pk": val.pk, "kind": val.kind.value} for key, val in dogs_db.items() if val.kind == dog_kind}
+  return JSONResponse(dogs_db_filtered)
+
+@app.post('/dog')
+def post_new_dog(JSONstr:str):
+  new_dogs = json.loads(JSONstr)
+  for elem in new_dogs.items():
+    if dogs_db.get(int(elem[0]), False) == False:
+      dogs_db[int(elem[0])] = Dog(name=elem[1]['name'], pk=elem[1]['pk'], kind=elem[1]['kind'])
+      return JSONResponse(new_dogs)
+    else:
+      return f'Error: dog with id {int(elem[0])} already exists.'
